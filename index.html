@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HORECA JABODETABEK Dashboard 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .card { @apply bg-white p-6 rounded-xl shadow-sm border border-slate-200; }
+        .status-won { @apply bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold; }
+        .status-pending { @apply bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold; }
+        .status-lost { @apply bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-xs font-bold; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900">Recap Quotation HORECA 2025</h1>
+                <p class="text-slate-500">Wilayah JABODETABEK - Real-time Performance Tracker</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="window.location.reload()" class="bg-white border border-slate-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 transition">
+                    <i class="fa-solid fa-rotate mr-2"></i> Refresh Data
+                </button>
+                <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">
+                    <i class="fa-solid fa-file-export mr-2"></i> Export Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="card">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-500 text-sm font-medium">Total Nilai Penawaran</span>
+                    <i class="fa-solid fa-file-invoice-dollar text-indigo-500"></i>
+                </div>
+                <div class="text-2xl font-bold text-slate-900">IDR 42.85B</div>
+                <div class="text-emerald-500 text-xs font-bold mt-2"><i class="fa-solid fa-arrow-up mr-1"></i> +12.5% vs Bln Lalu</div>
+            </div>
+            <div class="card">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-500 text-sm font-medium">Total Quotation</span>
+                    <i class="fa-solid fa-clipboard-list text-blue-500"></i>
+                </div>
+                <div class="text-2xl font-bold text-slate-900">156</div>
+                <p class="text-slate-400 text-xs mt-2">Periode Jan - Mei 2025</p>
+            </div>
+            <div class="card">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-500 text-sm font-medium">Win Rate</span>
+                    <i class="fa-solid fa-trophy text-amber-500"></i>
+                </div>
+                <div class="text-2xl font-bold text-slate-900">54.2%</div>
+                <div class="w-full bg-slate-100 h-2 rounded-full mt-3">
+                    <div class="bg-emerald-500 h-2 rounded-full" style="width: 54%"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-500 text-sm font-medium">Rata-rata Penawaran</span>
+                    <i class="fa-solid fa-chart-line text-purple-500"></i>
+                </div>
+                <div class="text-2xl font-bold text-slate-900">IDR 274M</div>
+                <p class="text-slate-400 text-xs mt-2">Per Customer</p>
+            </div>
+        </div>
+
+        <!-- Main Visuals -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <!-- Bar Chart -->
+            <div class="card lg:col-span-2">
+                <h3 class="text-lg font-bold mb-6">Performa Sales (Top 5)</h3>
+                <div class="h-[300px]">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+            <!-- Pie Chart -->
+            <div class="card">
+                <h3 class="text-lg font-bold mb-6">Status Penawaran</h3>
+                <div class="h-[300px] flex items-center justify-center">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="card overflow-hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold">Daftar Penawaran Terbaru</h3>
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                    <input type="text" placeholder="Cari customer..." class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-50 border-y border-slate-200">
+                            <th class="px-4 py-4 text-xs font-bold text-slate-500 uppercase">Customer</th>
+                            <th class="px-4 py-4 text-xs font-bold text-slate-500 uppercase">Sales</th>
+                            <th class="px-4 py-4 text-xs font-bold text-slate-500 uppercase">Wilayah</th>
+                            <th class="px-4 py-4 text-xs font-bold text-slate-500 uppercase">Nilai (IDR)</th>
+                            <th class="px-4 py-4 text-xs font-bold text-slate-500 uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr>
+                            <td class="px-4 py-4 font-semibold text-slate-700">Grand Hyatt Jakarta</td>
+                            <td class="px-4 py-4 text-slate-600 text-sm">Aditya P.</td>
+                            <td class="px-4 py-4 text-slate-600 text-sm">Jakarta Pusat</td>
+                            <td class="px-4 py-4 text-slate-700 font-bold">4.5B</td>
+                            <td class="px-4 py-4"><span class="status-won">Won</span></td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4 font-semibold text-slate-700">The Mulia Senayan</td>
+                            <td class="px-4 py-4 text-slate-600 text-sm">Siska W.</td>
+                            <td class="px-4 py-4 text-slate-600 text-sm">Jakarta Pusat</td>
+                            <td class="px-4 py-4 text-slate-700 font-bold">3.2B</td>
+                            <td class="px-4 py-4"><span class="status-pending">Negotiation</span></td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4 font-semibold text-slate-700">Bakmi GM Group</td>
+                            <td class="px-4 py-4 text-slate-600 text-sm">Rizky M.</td>
+                            <td class="px-4 py-4 text-slate-600 text-sm">JABODETABEK</td>
+                            <td class="px-4 py-4 text-slate-700 font-bold">1.8B</td>
+                            <td class="px-4 py-4"><span class="status-won">Won</span></td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4 font-semibold text-slate-700">Hotel Borobudur</td>
+                            <td class="px-4 py-4 text-slate-600 text-sm">Anita R.</td>
+                            <td class="px-4 py-4 text-slate-600 text-sm">Jakarta Pusat</td>
+                            <td class="px-4 py-4 text-slate-700 font-bold">950M</td>
+                            <td class="px-4 py-4"><span class="status-lost">Lost</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Sales Performance Chart (Bar)
+        const ctxSales = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctxSales, {
+            type: 'bar',
+            data: {
+                labels: ['Aditya P.', 'Siska W.', 'Rizky M.', 'Anita R.', 'Hendra S.'],
+                datasets: [{
+                    label: 'Total Nilai (IDR Miliar)',
+                    data: [12.5, 9.2, 8.4, 7.1, 5.6],
+                    backgroundColor: '#6366f1',
+                    borderRadius: 8,
+                    barThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 2. Status Distribution Chart (Doughnut)
+        const ctxStatus = document.getElementById('statusChart').getContext('2d');
+        new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: ['Won', 'Negotiation', 'Quoted', 'Lost'],
+                datasets: [{
+                    data: [42, 35, 15, 8],
+                    backgroundColor: ['#10b981', '#3b82f6', '#94a3b8', '#f43f5e'],
+                    hoverOffset: 4,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                },
+                cutout: '70%'
+            }
+        });
+
+        // Catatan untuk Integrasi Live GSheet:
+        // Anda bisa menambahkan fungsi fetch() ke link CSV GSheet Anda di sini
+        // async function loadData() {
+        //     const response = await fetch('LINK_CSV_GSHEET_ANDA');
+        //     const data = await response.text();
+        //     // Parse CSV dan update Chart/Table secara dinamis
+        // }
+    </script>
+</body>
+</html>
