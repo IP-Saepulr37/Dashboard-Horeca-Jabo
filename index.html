@@ -3,205 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HORECA JABODETABEK Dashboard 2025</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>SalesHub - Monitoring Real-Time</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .card { @apply bg-white p-6 rounded-xl shadow-sm border border-slate-200; }
-        .status-won { @apply bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold; }
-        .status-pending { @apply bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold; }
-        .status-lost { @apply bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-xs font-bold; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="text-slate-900">
 
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-900">Recap Quotation HORECA 2025</h1>
-                <p class="text-slate-500">Wilayah JABODETABEK - Real-time Performance Tracker</p>
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-72 bg-white border-r border-slate-200 p-8 flex flex-col">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="bg-blue-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
+                    <i data-lucide="bar-chart-big" class="text-white w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-800">SalesHub</h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Analytics Dashboard</p>
+                </div>
             </div>
-            <div class="flex gap-3">
-                <button onclick="window.location.reload()" class="bg-white border border-slate-300 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 transition">
-                    <i class="fa-solid fa-rotate mr-2"></i> Refresh Data
-                </button>
-                <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">
-                    <i class="fa-solid fa-file-export mr-2"></i> Export Report
-                </button>
-            </div>
-        </div>
 
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="card">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-slate-500 text-sm font-medium">Total Nilai Penawaran</span>
-                    <i class="fa-solid fa-file-invoice-dollar text-indigo-500"></i>
-                </div>
-                <div class="text-2xl font-bold text-slate-900">IDR 42.85B</div>
-                <div class="text-emerald-500 text-xs font-bold mt-2"><i class="fa-solid fa-arrow-up mr-1"></i> +12.5% vs Bln Lalu</div>
-            </div>
-            <div class="card">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-slate-500 text-sm font-medium">Total Quotation</span>
-                    <i class="fa-solid fa-clipboard-list text-blue-500"></i>
-                </div>
-                <div class="text-2xl font-bold text-slate-900">156</div>
-                <p class="text-slate-400 text-xs mt-2">Periode Jan - Mei 2025</p>
-            </div>
-            <div class="card">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-slate-500 text-sm font-medium">Win Rate</span>
-                    <i class="fa-solid fa-trophy text-amber-500"></i>
-                </div>
-                <div class="text-2xl font-bold text-slate-900">54.2%</div>
-                <div class="w-full bg-slate-100 h-2 rounded-full mt-3">
-                    <div class="bg-emerald-500 h-2 rounded-full" style="width: 54%"></div>
+            <div class="space-y-4">
+                <div class="p-4 bg-slate-50 rounded-2xl">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Status Koneksi GSheet</p>
+                    <div id="statusQuo" class="flex items-center gap-2 text-xs font-medium text-slate-600 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-slate-300"></span> Quotation: Menghubungkan...
+                    </div>
+                    <div id="statusSO" class="flex items-center gap-2 text-xs font-medium text-slate-600">
+                        <span class="w-2 h-2 rounded-full bg-slate-300"></span> Sales Order: Menghubungkan...
+                    </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-slate-500 text-sm font-medium">Rata-rata Penawaran</span>
-                    <i class="fa-solid fa-chart-line text-purple-500"></i>
-                </div>
-                <div class="text-2xl font-bold text-slate-900">IDR 274M</div>
-                <p class="text-slate-400 text-xs mt-2">Per Customer</p>
-            </div>
-        </div>
 
-        <!-- Main Visuals -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            <!-- Bar Chart -->
-            <div class="card lg:col-span-2">
-                <h3 class="text-lg font-bold mb-6">Performa Sales (Top 5)</h3>
-                <div class="h-[300px]">
-                    <canvas id="salesChart"></canvas>
-                </div>
+            <div class="mt-auto pt-6 text-[10px] text-slate-400 text-center border-t">
+                Pastikan "Restrict Access" di GSheet tidak dicentang.
             </div>
-            <!-- Pie Chart -->
-            <div class="card">
-                <h3 class="text-lg font-bold mb-6">Status Penawaran</h3>
-                <div class="h-[300px] flex items-center justify-center">
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
-        </div>
+        </aside>
 
-        <!-- Data Table -->
-        <div class="card overflow-hidden">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-bold">Daftar Penawaran Terbaru</h3>
-                <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                    <input type="text" placeholder="Cari customer..." class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-900">Performa Penjualan</h2>
+                        <p class="text-slate-500 mt-1">Sinkronisasi otomatis dari data <b>All SO Horeca</b>.</p>
+                    </div>
+                    <button id="syncBtn" onclick="fetchAllData()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-100 disabled:opacity-50">
+                        <i data-lucide="refresh-ccw" class="w-4 h-4" id="syncIcon"></i> Sinkronkan Sekarang
+                    </button>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="bg-white p-6 rounded-3xl card-shadow border border-slate-50">
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Total Nilai SO</p>
+                        <h3 class="text-2xl font-black text-slate-800" id="totalSO">Rp 0</h3>
+                        <p class="text-xs text-slate-500 mt-2" id="countSO">0 Data Transaksi</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl card-shadow border border-slate-50">
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Total Quotation</p>
+                        <h3 class="text-2xl font-black text-slate-800" id="totalQuo">Rp 0</h3>
+                        <p class="text-xs text-slate-500 mt-2" id="countQuo">0 Data Penawaran</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl card-shadow border border-slate-50">
+                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Conversion Rate</p>
+                        <h3 class="text-2xl font-black text-slate-800" id="winRate">0%</h3>
+                        <p class="text-xs text-slate-500 mt-2">Rasio Deal / Penawaran</p>
+                    </div>
+                </div>
+
+                <!-- Visual Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                    <div class="bg-white p-8 rounded-3xl card-shadow">
+                        <h4 class="font-bold text-slate-800 mb-6">Top 5 Customer (Nilai Terbesar)</h4>
+                        <div class="h-[300px]"><canvas id="barChart"></canvas></div>
+                    </div>
+                    <div class="bg-white p-8 rounded-3xl card-shadow">
+                        <h4 class="font-bold text-slate-800 mb-6">Komposisi Dokumen</h4>
+                        <div class="h-[300px]"><canvas id="pieChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Log Table -->
+                <div class="bg-white rounded-3xl card-shadow overflow-hidden">
+                    <div class="p-6 border-b border-slate-50 bg-slate-50/50">
+                        <h4 class="font-bold text-slate-800 text-sm uppercase tracking-widest">History Transaksi (10 Terakhir)</h4>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50/50">
+                                <tr class="text-[10px] font-bold text-slate-400 uppercase border-b border-slate-100">
+                                    <th class="px-6 py-4">Tgl PPIC</th>
+                                    <th class="px-6 py-4">Customer</th>
+                                    <th class="px-6 py-4">Tipe</th>
+                                    <th class="px-6 py-4 text-right">Nilai Value</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-slate-50 text-sm">
+                                <tr>
+                                    <td colspan="4" class="px-6 py-10 text-center text-slate-400 italic">Silakan tekan tombol sinkronisasi...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="bg-slate-50 border-y border-slate-200">
-                            <th class="px-4 py-4 text-xs font-bold text-slate-500 uppercase">Customer</th>
-                            <th class="px-4 py-4 text-xs font-bold text-slate-500 uppercase">Sales</th>
-                            <th class="px-4 py-4 text-xs font-bold text-slate-500 uppercase">Wilayah</th>
-                            <th class="px-4 py-4 text-xs font-bold text-slate-500 uppercase">Nilai (IDR)</th>
-                            <th class="px-4 py-4 text-xs font-bold text-slate-500 uppercase">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <tr>
-                            <td class="px-4 py-4 font-semibold text-slate-700">Grand Hyatt Jakarta</td>
-                            <td class="px-4 py-4 text-slate-600 text-sm">Aditya P.</td>
-                            <td class="px-4 py-4 text-slate-600 text-sm">Jakarta Pusat</td>
-                            <td class="px-4 py-4 text-slate-700 font-bold">4.5B</td>
-                            <td class="px-4 py-4"><span class="status-won">Won</span></td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-4 font-semibold text-slate-700">The Mulia Senayan</td>
-                            <td class="px-4 py-4 text-slate-600 text-sm">Siska W.</td>
-                            <td class="px-4 py-4 text-slate-600 text-sm">Jakarta Pusat</td>
-                            <td class="px-4 py-4 text-slate-700 font-bold">3.2B</td>
-                            <td class="px-4 py-4"><span class="status-pending">Negotiation</span></td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-4 font-semibold text-slate-700">Bakmi GM Group</td>
-                            <td class="px-4 py-4 text-slate-600 text-sm">Rizky M.</td>
-                            <td class="px-4 py-4 text-slate-600 text-sm">JABODETABEK</td>
-                            <td class="px-4 py-4 text-slate-700 font-bold">1.8B</td>
-                            <td class="px-4 py-4"><span class="status-won">Won</span></td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-4 font-semibold text-slate-700">Hotel Borobudur</td>
-                            <td class="px-4 py-4 text-slate-600 text-sm">Anita R.</td>
-                            <td class="px-4 py-4 text-slate-600 text-sm">Jakarta Pusat</td>
-                            <td class="px-4 py-4 text-slate-700 font-bold">950M</td>
-                            <td class="px-4 py-4"><span class="status-lost">Lost</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        </main>
     </div>
 
     <script>
-        // 1. Sales Performance Chart (Bar)
-        const ctxSales = document.getElementById('salesChart').getContext('2d');
-        new Chart(ctxSales, {
-            type: 'bar',
-            data: {
-                labels: ['Aditya P.', 'Siska W.', 'Rizky M.', 'Anita R.', 'Hendra S.'],
-                datasets: [{
-                    label: 'Total Nilai (IDR Miliar)',
-                    data: [12.5, 9.2, 8.4, 7.1, 5.6],
-                    backgroundColor: '#6366f1',
-                    borderRadius: 8,
-                    barThickness: 40
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                    x: { grid: { display: false } }
+        // URLs GSheet
+        const URL_QUO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRNIPB2TI_-doRE3-5WayOxIxeCZDqI36OX2SG0jHgPFFcWx_y4BPKaDCqgfw2ZM8FQFqYW99SPfzo8/pub?gid=1208033421&single=true&output=csv';
+        const URL_SO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSPBRsW85hGJ77tYCkqLF3z94F4lw5yFXXVfjmLnJMWOBF0wvhhUqMw-XobPHbQN4214RBQAgezdVtu/pub?output=csv';
+
+        let chartRef = { bar: null, pie: null };
+
+        const formatCurrency = (val) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
+        };
+
+        function csvToArray(strData) {
+            const arr = [];
+            let row = [];
+            let cell = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < strData.length; i++) {
+                let char = strData[i];
+                let nextChar = strData[i+1];
+                
+                if (char === '"' && inQuotes && nextChar === '"') { cell += '"'; i++; }
+                else if (char === '"') { inQuotes = !inQuotes; }
+                else if (char === ',' && !inQuotes) { row.push(cell.trim()); cell = ''; }
+                else if ((char === '\n' || char === '\r') && !inQuotes) {
+                    if (cell !== '' || row.length > 0) {
+                        row.push(cell.trim());
+                        arr.push(row);
+                    }
+                    row = [];
+                    cell = '';
+                    if (char === '\r' && nextChar === '\n') i++;
                 }
+                else { cell += char; }
             }
-        });
+            if (cell !== '' || row.length > 0) {
+                row.push(cell.trim());
+                arr.push(row);
+            }
+            return arr;
+        }
 
-        // 2. Status Distribution Chart (Doughnut)
-        const ctxStatus = document.getElementById('statusChart').getContext('2d');
-        new Chart(ctxStatus, {
-            type: 'doughnut',
-            data: {
-                labels: ['Won', 'Negotiation', 'Quoted', 'Lost'],
-                datasets: [{
-                    data: [42, 35, 15, 8],
-                    backgroundColor: ['#10b981', '#3b82f6', '#94a3b8', '#f43f5e'],
-                    hoverOffset: 4,
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+        async function fetchSheetData(url, type, statusId) {
+            const statusEl = document.getElementById(statusId);
+            try {
+                // Tambahkan random param untuk bypass cache
+                const finalUrl = url + (url.includes('?') ? '&' : '?') + 'nocache=' + Date.now();
+                const response = await fetch(finalUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Gagal akses. Status: ${response.status}. Pastikan GSheet di-Publish ke Web.`);
+                }
+
+                const csvText = await response.text();
+                const rows = csvToArray(csvText);
+
+                if (rows.length < 2) return [];
+
+                // Mapping untuk Sales Order (SO) berdasarkan gambar tabel User
+                // Indeks 1: Tgl PPIC, Indeks 5: Customer, Indeks 12: Value
+                return rows.slice(1).map(cols => {
+                    let dateStr = cols[1] || 'N/A';
+                    let customer = cols[5] || 'Unknown';
+                    let rawVal = cols[12] || '0';
+                    
+                    // Bersihkan angka (Hapus Rp, titik, koma)
+                    let cleanVal = parseFloat(rawVal.replace(/[^\d.-]/g, '')) || 0;
+
+                    return { date: dateStr, customer, amount: cleanVal, type: type };
+                }).filter(item => item.customer !== 'Unknown');
+
+            } catch (err) {
+                console.error(err);
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> ${type}: Error (Akses Dibatasi)`;
+                return [];
+            }
+        }
+
+        async function fetchAllData() {
+            const btn = document.getElementById('syncBtn');
+            const icon = document.getElementById('syncIcon');
+            
+            btn.disabled = true;
+            icon.classList.add('animate-spin');
+            
+            const dataSO = await fetchSheetData(URL_SO, 'Sales Order', 'statusSO');
+            const dataQuo = await fetchSheetData(URL_QUO, 'Quotation', 'statusQuo');
+
+            if (dataSO.length > 0) document.getElementById('statusSO').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Sales Order: Connected`;
+            if (dataQuo.length > 0) document.getElementById('statusQuo').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Quotation: Connected`;
+
+            updateUI([...dataSO, ...dataQuo]);
+            
+            btn.disabled = false;
+            icon.classList.remove('animate-spin');
+        }
+
+        function updateUI(allData) {
+            const soOnly = allData.filter(d => d.type === 'Sales Order');
+            const quoOnly = allData.filter(d => d.type === 'Quotation');
+
+            const sumSO = soOnly.reduce((acc, curr) => acc + curr.amount, 0);
+            const sumQuo = quoOnly.reduce((acc, curr) => acc + curr.amount, 0);
+            const rate = (quoOnly.length > 0) ? ((soOnly.length / quoOnly.length) * 100).toFixed(1) : 0;
+
+            document.getElementById('totalSO').innerText = formatCurrency(sumSO);
+            document.getElementById('countSO').innerText = `${soOnly.length} Baris Data SO`;
+            document.getElementById('totalQuo').innerText = formatCurrency(sumQuo);
+            document.getElementById('countQuo').innerText = `${quoOnly.length} Baris Data Quo`;
+            document.getElementById('winRate').innerText = `${rate}%`;
+
+            // Table
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            allData.slice(0, 10).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-slate-500">${item.date}</td>
+                    <td class="px-6 py-4 font-bold text-slate-800">${item.customer}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-lg text-[10px] font-bold uppercase ${item.type === 'Sales Order' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}">
+                            ${item.type}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right font-bold text-slate-900">${formatCurrency(item.amount)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            renderCharts(soOnly, quoOnly);
+        }
+
+        function renderCharts(so, quo) {
+            // Chart Bar: Top 5 Customer
+            const custMap = {};
+            so.forEach(d => custMap[d.customer] = (custMap[d.customer] || 0) + d.amount);
+            const sorted = Object.entries(custMap).sort((a,b) => b[1] - a[1]).slice(0, 5);
+
+            if(chartRef.bar) chartRef.bar.destroy();
+            chartRef.bar = new Chart(document.getElementById('barChart'), {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(x => x[0]),
+                    datasets: [{
+                        label: 'Nilai (IDR)',
+                        data: sorted.map(x => x[1]),
+                        backgroundColor: '#2563eb',
+                        borderRadius: 10
+                    }]
                 },
-                cutout: '70%'
-            }
-        });
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
 
-        // Catatan untuk Integrasi Live GSheet:
-        // Anda bisa menambahkan fungsi fetch() ke link CSV GSheet Anda di sini
-        // async function loadData() {
-        //     const response = await fetch('LINK_CSV_GSHEET_ANDA');
-        //     const data = await response.text();
-        //     // Parse CSV dan update Chart/Table secara dinamis
-        // }
+            // Chart Pie
+            if(chartRef.pie) chartRef.pie.destroy();
+            chartRef.pie = new Chart(document.getElementById('pieChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Sales Order', 'Quotation'],
+                    datasets: [{
+                        data: [so.length, quo.length],
+                        backgroundColor: ['#10b981', '#3b82f6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        window.onload = () => {
+            lucide.createIcons();
+            fetchAllData();
+        };
     </script>
 </body>
 </html>
