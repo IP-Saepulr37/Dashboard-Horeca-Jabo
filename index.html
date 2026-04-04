@@ -40,8 +40,8 @@
                 </div>
             </div>
 
-            <div class="mt-auto pt-6 text-[10px] text-slate-400 text-center border-t">
-                Pastikan "Restrict Access" di GSheet tidak dicentang.
+            <div class="mt-auto pt-6 text-[10px] text-slate-400 text-center border-t leading-relaxed">
+                Tip: Data diperbarui otomatis oleh Google setiap ~5 menit setelah GSheet diedit.
             </div>
         </aside>
 
@@ -51,7 +51,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                     <div>
                         <h2 class="text-3xl font-extrabold text-slate-900">Performa Penjualan</h2>
-                        <p class="text-slate-500 mt-1">Sinkronisasi otomatis dari data <b>All SO Horeca</b>.</p>
+                        <p class="text-slate-500 mt-1 text-sm">Dashboard ini menggunakan Web URL CSV tanpa memerlukan AppScript.</p>
                     </div>
                     <button id="syncBtn" onclick="fetchAllData()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-100 disabled:opacity-50">
                         <i data-lucide="refresh-ccw" class="w-4 h-4" id="syncIcon"></i> Sinkronkan Sekarang
@@ -80,11 +80,11 @@
                 <!-- Visual Charts -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
                     <div class="bg-white p-8 rounded-3xl card-shadow">
-                        <h4 class="font-bold text-slate-800 mb-6">Top 5 Customer (Nilai Terbesar)</h4>
+                        <h4 class="font-bold text-slate-800 mb-6">Top 5 Customer (Berdasarkan Nilai SO)</h4>
                         <div class="h-[300px]"><canvas id="barChart"></canvas></div>
                     </div>
                     <div class="bg-white p-8 rounded-3xl card-shadow">
-                        <h4 class="font-bold text-slate-800 mb-6">Komposisi Dokumen</h4>
+                        <h4 class="font-bold text-slate-800 mb-6">Proporsi Jenis Dokumen</h4>
                         <div class="h-[300px]"><canvas id="pieChart"></canvas></div>
                     </div>
                 </div>
@@ -98,15 +98,15 @@
                         <table class="w-full text-left">
                             <thead class="bg-slate-50/50">
                                 <tr class="text-[10px] font-bold text-slate-400 uppercase border-b border-slate-100">
-                                    <th class="px-6 py-4">Tgl PPIC</th>
+                                    <th class="px-6 py-4">Tgl</th>
                                     <th class="px-6 py-4">Customer</th>
                                     <th class="px-6 py-4">Tipe</th>
-                                    <th class="px-6 py-4 text-right">Nilai Value</th>
+                                    <th class="px-6 py-4 text-right">Nilai</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="divide-y divide-slate-50 text-sm">
                                 <tr>
-                                    <td colspan="4" class="px-6 py-10 text-center text-slate-400 italic">Silakan tekan tombol sinkronisasi...</td>
+                                    <td colspan="4" class="px-6 py-10 text-center text-slate-400 italic">Memuat data...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -117,7 +117,7 @@
     </div>
 
     <script>
-        // URLs GSheet
+        // URLs GSheet (Publish to Web as CSV)
         const URL_QUO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRNIPB2TI_-doRE3-5WayOxIxeCZDqI36OX2SG0jHgPFFcWx_y4BPKaDCqgfw2ZM8FQFqYW99SPfzo8/pub?gid=1208033421&single=true&output=csv';
         const URL_SO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSPBRsW85hGJ77tYCkqLF3z94F4lw5yFXXVfjmLnJMWOBF0wvhhUqMw-XobPHbQN4214RBQAgezdVtu/pub?output=csv';
 
@@ -127,6 +127,7 @@
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
         };
 
+        // Fungsi Parser CSV yang menangani karakter khusus dan quote
         function csvToArray(strData) {
             const arr = [];
             let row = [];
@@ -161,35 +162,45 @@
         async function fetchSheetData(url, type, statusId) {
             const statusEl = document.getElementById(statusId);
             try {
-                // Tambahkan random param untuk bypass cache
-                const finalUrl = url + (url.includes('?') ? '&' : '?') + 'nocache=' + Date.now();
+                // Bypass Cache
+                const finalUrl = `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`;
                 const response = await fetch(finalUrl);
                 
                 if (!response.ok) {
-                    throw new Error(`Gagal akses. Status: ${response.status}. Pastikan GSheet di-Publish ke Web.`);
+                    throw new Error("Akses Ditolak/URL Salah");
                 }
 
                 const csvText = await response.text();
                 const rows = csvToArray(csvText);
 
-                if (rows.length < 2) return [];
+                if (rows.length < 2) {
+                    statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-yellow-500"></span> ${type}: Kosong`;
+                    return [];
+                }
 
-                // Mapping untuk Sales Order (SO) berdasarkan gambar tabel User
+                // Pemetaan Kolom untuk 'All SO Horeca':
                 // Indeks 1: Tgl PPIC, Indeks 5: Customer, Indeks 12: Value
-                return rows.slice(1).map(cols => {
-                    let dateStr = cols[1] || 'N/A';
-                    let customer = cols[5] || 'Unknown';
-                    let rawVal = cols[12] || '0';
+                const mappedData = rows.slice(1).map(cols => {
+                    const customer = cols[5] || 'Unknown';
+                    const rawVal = cols[12] || '0';
                     
-                    // Bersihkan angka (Hapus Rp, titik, koma)
-                    let cleanVal = parseFloat(rawVal.replace(/[^\d.-]/g, '')) || 0;
+                    // Bersihkan nominal: hapus titik ribuan, Rp, dll agar jadi angka murni
+                    const cleanVal = parseFloat(rawVal.replace(/[^\d.-]/g, '')) || 0;
 
-                    return { date: dateStr, customer, amount: cleanVal, type: type };
-                }).filter(item => item.customer !== 'Unknown');
+                    return { 
+                        date: cols[1] || 'N/A', 
+                        customer: customer, 
+                        amount: cleanVal, 
+                        type: type 
+                    };
+                }).filter(item => item.customer !== 'Unknown' && item.customer !== '');
+
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> ${type}: Tersambung`;
+                return mappedData;
 
             } catch (err) {
-                console.error(err);
-                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> ${type}: Error (Akses Dibatasi)`;
+                console.error(`Error ${type}:`, err);
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> ${type}: Error Akses`;
                 return [];
             }
         }
@@ -201,11 +212,11 @@
             btn.disabled = true;
             icon.classList.add('animate-spin');
             
-            const dataSO = await fetchSheetData(URL_SO, 'Sales Order', 'statusSO');
-            const dataQuo = await fetchSheetData(URL_QUO, 'Quotation', 'statusQuo');
-
-            if (dataSO.length > 0) document.getElementById('statusSO').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Sales Order: Connected`;
-            if (dataQuo.length > 0) document.getElementById('statusQuo').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Quotation: Connected`;
+            // Ambil data secara paralel
+            const [dataSO, dataQuo] = await Promise.all([
+                fetchSheetData(URL_SO, 'Sales Order', 'statusSO'),
+                fetchSheetData(URL_QUO, 'Quotation', 'statusQuo')
+            ]);
 
             updateUI([...dataSO, ...dataQuo]);
             
@@ -222,17 +233,26 @@
             const rate = (quoOnly.length > 0) ? ((soOnly.length / quoOnly.length) * 100).toFixed(1) : 0;
 
             document.getElementById('totalSO').innerText = formatCurrency(sumSO);
-            document.getElementById('countSO').innerText = `${soOnly.length} Baris Data SO`;
+            document.getElementById('countSO').innerText = `${soOnly.length} Transaksi SO`;
             document.getElementById('totalQuo').innerText = formatCurrency(sumQuo);
-            document.getElementById('countQuo').innerText = `${quoOnly.length} Baris Data Quo`;
+            document.getElementById('countQuo').innerText = `${quoOnly.length} Penawaran Terdata`;
             document.getElementById('winRate').innerText = `${rate}%`;
 
-            // Table
+            // Update Tabel
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            allData.slice(0, 10).forEach(item => {
+            if (allData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-10 text-center text-red-400 font-medium">Data gagal dimuat. Pastikan GSheet sudah di-Publish ke Web dan akses publik dibuka.</td></tr>';
+                return;
+            }
+
+            // Urutkan data berdasarkan yang terbaru (asumsi kolom tanggal mendukung sorting)
+            const displayData = [...allData].slice(0, 10);
+            
+            displayData.forEach(item => {
                 const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
                 tr.innerHTML = `
                     <td class="px-6 py-4 font-medium text-slate-500">${item.date}</td>
                     <td class="px-6 py-4 font-bold text-slate-800">${item.customer}</td>
@@ -250,7 +270,7 @@
         }
 
         function renderCharts(so, quo) {
-            // Chart Bar: Top 5 Customer
+            // Bar Chart: Top 5 Customer
             const custMap = {};
             so.forEach(d => custMap[d.customer] = (custMap[d.customer] || 0) + d.amount);
             const sorted = Object.entries(custMap).sort((a,b) => b[1] - a[1]).slice(0, 5);
@@ -270,11 +290,12 @@
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
 
-            // Chart Pie
+            // Pie Chart: Komposisi Dokumen
             if(chartRef.pie) chartRef.pie.destroy();
             chartRef.pie = new Chart(document.getElementById('pieChart'), {
                 type: 'doughnut',
@@ -283,6 +304,7 @@
                     datasets: [{
                         data: [so.length, quo.length],
                         backgroundColor: ['#10b981', '#3b82f6'],
+                        hoverOffset: 4,
                         borderWidth: 0
                     }]
                 },
